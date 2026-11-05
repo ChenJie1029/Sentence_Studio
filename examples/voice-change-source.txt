@@ -1,0 +1,4 @@
+voice-change.wav 是测试用拼接示例，包含合成英语语音及公开演讲节选，不是一段真实对话。
+合成语音部分约 12.74 秒，然后连接 0.6 秒静音及演讲录音。
+演讲测试音频来源：Hugging Face / Xenova / transformers.js-docs 的 jfk.wav。
+https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav
