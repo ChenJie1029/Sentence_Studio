@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#246e57"><meta name="description" content="上传英文录音与原文，自动对齐成句。用逐句循环、变速和隐藏原文，专注听懂每一句。">
+  <title>句听 · 英语听写工作台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23246e57'/%3E%3Cpath d='M18 34v-5a14 14 0 0 1 28 0v5M18 32v12h7V32zm21 0v12h7V32z' fill='none' stroke='white' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="import-styles.css"><link rel="stylesheet" href="audio-range-styles.css"><link rel="stylesheet" href="segmentation-styles.css">
+</head>
+<body>
+  <svg class="icon-defs" aria-hidden="true"><defs>
+    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 13H7v7H4zm13 0h3v7h-3z"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 3 7M3 4v7h7m2-4v5l3 2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H5v18h14V8zM14 3v5h5M8 12h8m-8 4h6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="m3 3 18 18M10.5 5.1C16.5 4.1 22 12 22 12a24 24 0 0 1-3.4 4.2M6.4 6.4C3.6 8.6 2 12 2 12s4 7 10 7c1.9 0 3.6-.7 5-1.7M10 10a3 3 0 0 0 4 4"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M5 5v14m14-14-10 7 10 7Z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M19 5v14M5 5l10 7-10 7Z"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 8h14l-3-3m3 3-3 3M20 16H6l3 3m-3-3 3-3M3 8v5m18-2v5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 19v2h16v-2"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-tune" viewBox="0 0 24 24"><path d="M4 6h16M4 18h16M8 3v6m8 6v6M4 12h16m-4-3v6"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+  </defs></svg>
+  <aside class="sidebar">
+    <a class="brand" href="./" aria-label="句听首页"><span class="brand-mark"><svg><use href="#i-headphones"/></svg></span><span>句听<small>SENTENCE STUDIO</small></span></a>
+    <div class="side-label">学习空间</div>
+    <button class="nav-item active" id="workspace-nav"><svg><use href="#i-grid"/></svg>听写工作台<span class="nav-dot"></span></button>
+    <button class="nav-item" id="history-nav"><svg><use href="#i-history"/></svg>练习记录</button>
+    <div class="side-label materials-label"><span>我的素材</span><button class="icon-button" id="side-import" aria-label="导入新素材"><svg><use href="#i-plus"/></svg></button></div>
+    <div id="material-list" class="material-list"></div>
+    <button class="side-add" id="side-add"><svg><use href="#i-plus"/></svg>添加学习素材</button>
+    <div class="side-bottom"><div class="daily-note"><span class="note-symbol">“</span><p>A little progress,<br>every single day.</p><span>每一天，都听懂多一点。</span></div><div class="local-badge"><span></span>素材与练习保存在本机</div></div>
+  </aside>
+  <main>
+    <header class="topbar"><div class="breadcrumb">学习空间 <span>/</span> <strong>听写工作台</strong></div><button class="text-button" id="help-button"><svg><use href="#i-info"/></svg>使用指南</button></header>
+    <div class="workspace">
+      <section class="page-heading"><div><div class="eyebrow">YOUR DAILY LISTENING PRACTICE</div><h1>听懂，从每一句开始<span>。</span></h1><p>慢一点，听仔细。让每一次重复，都有新的收获。</p></div><button class="button primary" id="import-button"><svg><use href="#i-plus"/></svg>导入新素材</button></section>
+      <section class="material-header"><div class="material-art"><svg><use href="#i-headphones"/></svg></div><div class="material-heading"><div class="material-kicker"><span id="material-tag">内置示例</span><span class="dot-separator">·</span><span id="material-meta">正在加载</span></div><h2 id="material-title">The art of small steps</h2></div><div class="header-actions"><button class="text-button source-proof-button" id="source-proof-button"><svg><use href="#i-file"/></svg>核验记录</button><span id="save-status" class="save-status"><svg><use href="#i-check"/></svg>本机保存</span><button class="button secondary compact" id="export-button"><svg><use href="#i-down"/></svg>导出</button></div></section>
+      <div id="segmentation-note" class="segmentation-note hidden" role="status"></div>
+      <div id="storage-warning" class="notice hidden" role="status"></div>
+      <div class="study-grid">
+        <div class="study-main">
+          <section class="card listening-card" aria-label="逐句播放器">
+            <div class="card-top"><div class="section-label"><span class="green-dot"></span>专注听写 <span class="quiet">/ 先听，再揭晓</span></div><span class="sentence-counter"><strong id="sentence-number">01</strong><span>/ <span id="sentence-total">08</span></span></span></div>
+            <div class="transcript-box" id="transcript-box"><div class="hidden-transcript" id="hidden-transcript"><span class="hidden-lines"><i></i><i></i><i></i></span><p>先用耳朵捕捉这句话</p><span>准备好后，再看看原文。</span></div><p id="transcript" lang="en" class="transcript hidden"></p><button class="reveal-button" id="reveal-button"><svg><use href="#i-eye"/></svg><span>显示原文</span><kbd>T</kbd></button></div>
+            <div class="wave-wrap"><canvas id="waveform" role="img" aria-label="当前句音频波形"></canvas><input id="seek" class="seek" type="range" min="0" max="1000" value="0" aria-label="当前句播放进度"></div>
+            <div class="wave-meta"><span id="elapsed">00:00</span><span id="segment-range">原音频 00:00 – 00:00</span><span id="duration">00:00</span></div>
+            <div class="play-controls"><button class="icon-button replay" id="replay-button" title="从头重听（R）" aria-label="从头重听"><svg><use href="#i-repeat"/></svg></button><div class="main-controls"><button class="icon-button skip" id="previous-button" aria-label="上一句"><svg><use href="#i-prev"/></svg></button><button id="play-button" class="play-button" aria-label="播放"><svg><use href="#i-play"/></svg></button><button class="icon-button skip" id="next-button" aria-label="下一句"><svg><use href="#i-next"/></svg></button></div><button class="icon-button calibrate" id="calibrate-button" title="调整本句切点" aria-label="调整本句切点"><svg><use href="#i-tune"/></svg></button></div>
+            <div class="loop-status"><span id="loop-dots"></span><span id="loop-status">第 1 / 3 遍</span><span class="playing-label" id="playing-label">准备好就开始</span></div>
+            <div class="settings"><div class="speed-setting"><label for="speed">播放速度 <strong id="speed-label">1.0×</strong></label><div class="speed-line"><span>0.5×</span><input type="range" id="speed" min="5" max="15" step="1" value="10" aria-label="播放速度，0.5 至 1.5 倍，每档 0.1"><span>1.5×</span></div></div><div class="repeat-setting"><label>每句循环</label><div class="repeat-options" id="repeat-options"><button data-repeat="1" title="只播放一次，不循环">1 遍</button><button data-repeat="2">2 遍</button><button data-repeat="3" class="selected">3 遍</button><button data-repeat="4">4 遍</button><button data-repeat="5">5 遍</button></div></div></div>
+            <div class="secondary-settings"><label>重复间隔 <select id="gap" aria-label="重复间隔"><option value="0">无间隔</option><option value="1" selected>1 秒</option><option value="2">2 秒</option><option value="3">3 秒</option><option value="5">5 秒</option></select></label><label class="toggle-label">循环后自动下一句<input type="checkbox" id="auto-next"><span class="toggle"></span></label></div>
+          </section>
+          <section class="card dictation-card"><div class="card-top"><div class="section-label"><svg><use href="#i-file"/></svg>写下你听到的</div><span id="word-count" class="quiet">0 words</span></div><label class="sr-only" for="answer">本句听写内容</label><textarea id="answer" lang="en" placeholder="Listen closely. Write what you hear…" spellcheck="false"></textarea><div id="comparison" class="comparison hidden" aria-live="polite"></div><div class="dictation-footer"><span class="autosave"><span></span><span id="answer-save">输入内容自动保存</span></span><div class="answer-actions"><button class="button secondary compact" id="check-button">核对原文</button><button class="button primary compact" id="complete-button">完成本句<svg><use href="#i-check"/></svg></button></div></div></section>
+          <div class="keyboard-hints"><span><kbd>Space</kbd> 播放 / 暂停</span><span><kbd>←</kbd><kbd>→</kbd> 切换句子</span><span><kbd>R</kbd> 重听</span><span><kbd>T</kbd> 原文</span><span class="keyboard-note">输入时快捷键不生效</span></div>
+        </div>
+        <aside class="card queue-card"><div class="queue-header"><h3>句子列表</h3><span id="queue-count">8 句</span></div><div class="progress-summary"><div><span>本次素材进度</span><strong id="progress-label">0 / 8</strong></div><div class="progress-track"><div id="progress-bar"></div></div></div><div class="sentence-list" id="sentence-list" aria-label="选择练习句子"></div><div class="queue-footer"><svg><use href="#i-eyeoff"/></svg><span>原文默认隐藏，专注听力本身</span></div></aside>
+      </div>
+      <footer class="page-footer"><span>一句一句，把英语听进心里。</span><span>句听 · SENTENCE STUDIO</span></footer>
+    </div>
+  </main>
+  <dialog id="import-dialog" class="modal import-modal"><form id="import-form">
+    <div class="modal-heading"><div><div class="eyebrow">A NEW LISTENING JOURNEY</div><h2>导入并核对学习素材</h2></div><button type="button" data-close class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div>
+    <p class="modal-description">先设置录音的起止时间，再校对英文原文，逐句切分你要练习的内容。</p>
+    <div class="import-steps"><span>01 设置音频范围</span><i>→</i><span>02 导入并校对原文</span><i>→</i><span>03 逐句切分</span></div>
+    <label class="field-label" for="lesson-name">素材名称</label><input id="lesson-name" class="text-input" placeholder="例如：每日英语 · The power of habits" maxlength="100">
+    <label class="upload-zone" id="drop-zone"><input type="file" id="audio-file" accept="audio/*,.mp3,.wav,.m4a,.ogg,.flac,.aac" required><span class="upload-icon"><svg><use href="#i-upload"/></svg></span><strong id="audio-file-label">点击选择或拖入录音</strong><span>MP3、WAV、M4A 等浏览器可解码格式 · 文件 ≤ 100 MB · 所选范围最长 20 分钟</span></label>
+    <div id="audio-range-summary" class="audio-range-summary hidden"><span id="audio-range-label"></span><button id="edit-audio-range" type="button">设置范围</button></div>
+    <div class="field-label text-file-label"><span>原文材料</span><label class="text-link">选择 PDF / 图片 / 文本<input type="file" id="text-file" accept=".txt,.srt,.vtt,.pdf,.png,.jpg,.jpeg,.webp,.bmp" multiple hidden></label></div>
+    <div class="source-file-description"><span id="source-file-status">TXT / SRT / VTT / PDF / 图片，支持按顺序选取多个文件</span><small>英文图片识别 · PDF 每个文件最多 30 页 · 本批最多 12 个文件 / 60 页</small></div>
+    <div id="source-progress-row" class="source-progress-row hidden" role="status"><div><span id="source-file-progress">正在读取原文…</span><button type="button" id="source-cancel">取消识别</button></div><progress id="source-file-progress-bar" max="100"></progress></div>
+    <section id="source-review" class="source-review hidden" aria-label="原文件逐页校对">
+      <div class="source-review-header"><strong>对照原文件逐页校对</strong><span id="source-review-summary"></span><button type="button" id="source-clear">清除文件</button></div>
+      <div id="source-page-list" class="source-page-list"></div>
+      <div class="source-page-heading"><strong id="source-page-name"></strong><span id="source-method"></span></div>
+      <div class="source-review-grid"><div class="source-preview-box"><img id="source-page-preview" class="hidden" alt="原文件预览"><pre id="source-original-text"></pre><a id="source-preview-open" class="source-preview-open hidden" target="_blank" rel="noopener">放大查看原页</a></div><div class="source-edit-box"><label for="source-page-text">本页提取文字（可修正识别错误）</label><textarea id="source-page-text" spellcheck="false" lang="en"></textarea></div></div>
+      <p id="source-uncertain" class="source-uncertain"></p>
+      <div class="source-page-checks"><label><input type="checkbox" id="source-page-included" checked>本页参与原文</label><label><input type="checkbox" id="source-page-reviewed">本页文字已核对</label></div>
+      <div class="source-page-controls"><div><button type="button" id="source-page-prev">上一页</button><span id="source-page-position"></span><button type="button" id="source-page-next">下一页</button></div><div><button type="button" id="source-move-up">顺序前移</button><button type="button" id="source-move-down">顺序后移</button></div></div>
+    </section>
+    <label class="field-label" for="source-text">最终英文原文</label><textarea id="source-text" class="source-text" placeholder="可直接粘贴原文，或从上方文件提取后校对。原文需与所选音频范围完全对应，检查是否漏词、多词或顺序有误。" required maxlength="60000" spellcheck="false" lang="en"></textarea>
+    <label class="source-approved"><input id="source-approved" type="checkbox"><span>我已对照原文件校对最终原文，确认用词、顺序和完整性；如有标题、题目或页码，已明确核对取舍。</span></label>
+    <div class="segmentation-rule"><strong>按声音停顿切分 · 优先 8–15 秒</strong><p>每段播放到 8–15 秒时，选择合适的停顿；换人不足 8 秒时，等待后续切点。没有可靠停顿时保留连续语音，结尾可能不足 8 秒。</p><label><input type="checkbox" id="detect-speakers" checked>辅助检测说话人切换</label></div>
+    <div class="recognition-setting"><label for="recognition-model">原文辅助匹配</label><select id="recognition-model"><option value="base">准确优先 · 较大的模型</option><option value="tiny">轻量识别 · 较快</option></select></div>
+    <div class="import-note"><svg><use href="#i-spark"/></svg><p>先按声音停顿和说话人变化切好音频，再辅助匹配你确认的原文。识别文字不会替换原文；分界不确定时可试听调整。说话人检测可能受噪声或重叠讲话影响。首次使用需联网下载组件。</p></div>
+    <div id="import-error" class="form-error hidden" role="alert"></div>
+    <div class="modal-actions"><button type="button" data-close class="button secondary">取消</button><button id="import-submit" class="button primary" type="submit"><svg><use href="#i-check"/></svg>开始逐句切分</button></div>
+  </form></dialog>
+  <dialog id="audio-range-dialog" class="modal range-modal" aria-labelledby="audio-range-heading"><form id="audio-range-form" novalidate>
+    <div class="modal-heading"><div><div class="eyebrow">CHOOSE YOUR LISTENING</div><h2 id="audio-range-heading">从第几秒开始，到第几秒结束？</h2></div><button id="range-close" class="icon-button" type="button" aria-label="关闭范围设置"><svg><use href="#i-close"/></svg></button></div>
+    <p class="modal-description">跳过开场或结尾，只留下与原文对应的那一段。</p>
+    <div class="range-file"><strong id="range-file-name"></strong><span id="range-total"></span></div>
+    <div class="time-fields"><label for="audio-start">从第几秒开始<input id="audio-start" class="text-input" type="number" min="0" step="any" inputmode="decimal" placeholder="例如：30.5" required></label><label for="audio-end">到第几秒结束<input id="audio-end" class="text-input" type="number" min="0" step="any" inputmode="decimal" placeholder="例如：180" required></label></div>
+    <p id="range-duration" class="range-duration" aria-live="polite"></p><p class="range-help">按原录音的秒数填写，支持小数。例如 1 分 30 秒填写 90。所选范围内的语音应与英文原文完整对应。</p>
+    <div class="range-preview"><div><button id="range-preview-button" class="button secondary compact" type="button"><svg><use href="#i-play"/></svg>试听所选范围</button><span id="range-preview-status" role="status"></span></div><audio id="range-preview-player" class="hidden" controls preload="metadata" aria-label="所选音频范围试听"></audio></div>
+    <div id="range-error" class="form-error hidden" role="alert"></div><div class="modal-actions"><button id="range-cancel" type="button" class="button secondary">稍后设置</button><button type="submit" class="button primary">确认范围<svg><use href="#i-check"/></svg></button></div>
+  </form></dialog>
+  <dialog id="segment-review-dialog" class="modal segment-review-modal"><div class="modal-heading"><div><div class="eyebrow">KEEP YOUR ORIGINAL WORDS</div><h2>核对分段原文</h2></div><button id="segment-review-close" class="icon-button" aria-label="返回导入"><svg><use href="#i-close"/></svg></button></div><p id="segment-review-summary" class="segment-review-summary"></p><p id="segment-review-now" class="segment-review-now" aria-live="polite"></p><audio id="segment-review-player" class="hidden" controls aria-label="分段原文核对试听"></audio><div id="segment-review-rows"></div><details><summary>查看完整原文</summary><p id="segment-review-original" lang="en"></p></details><label class="source-approved"><input id="segment-review-approved" type="checkbox"><span>我已试听核对，确认每段录音与这里的原文对应。</span></label><div id="segment-review-error" class="form-error hidden" role="alert"></div><div class="modal-actions"><button id="segment-review-back" class="button secondary">返回导入</button><button id="segment-review-confirm" class="button primary">确认并开始练习</button></div></dialog>
+  <dialog id="processing-dialog" class="modal processing-modal"><div class="processing-icon"><svg><use href="#i-headphones"/></svg></div><div class="eyebrow">PREPARING YOUR PRACTICE</div><h2>让声音，找到它的句子</h2><p id="processing-message" aria-live="polite">正在读取音频…</p><progress id="processing-progress"></progress><p class="processing-tip">识别可能需要几分钟。只分析已确认范围内的停顿与声音变化。原文分界不确定时会请你试听确认。取消保留导入设置。</p><button class="button secondary" id="cancel-processing">取消处理</button></dialog>
+  <dialog id="calibrate-dialog" class="modal small-modal"><div class="modal-heading"><h2>调整本句切点</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p class="modal-description">如果开头或结尾不完整，可以微调时间后试听。</p><div class="time-fields"><label>起点（秒）<input id="segment-start" class="text-input" type="number" min="0" step="0.01"></label><label>终点（秒）<input id="segment-end" class="text-input" type="number" min="0" step="0.01"></label></div><p id="calibration-limit" class="quiet"></p><div id="calibrate-error" class="form-error hidden"></div><div class="modal-actions"><button class="button secondary" id="preview-boundary">试听切点</button><button class="button primary" id="save-boundary">保存切点</button></div></dialog>
+  <dialog id="export-dialog" class="modal small-modal"><div class="modal-heading"><h2>导出学习素材</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p class="modal-description">带走切好的音频，继续你的练习。</p><button class="export-choice" id="export-audio"><svg><use href="#i-headphones"/></svg><span><strong>完整练习音频</strong><small>按练习范围导出 · WAV · 原始速度</small></span><svg><use href="#i-down"/></svg></button><button class="export-choice" id="export-current"><svg><use href="#i-headphones"/></svg><span><strong>当前句音频</strong><small>独立 WAV 文件 · 原始速度</small></span><svg><use href="#i-down"/></svg></button><button class="export-choice" id="export-all"><svg><use href="#i-grid"/></svg><span><strong>全部句子音频</strong><small>ZIP · 合并音频 + 每句音频 + 原文与记录</small></span><svg><use href="#i-down"/></svg></button><button class="export-choice" id="export-notes"><svg><use href="#i-file"/></svg><span><strong>听写练习记录</strong><small>包含你的听写、原文与完成状态</small></span><svg><use href="#i-down"/></svg></button></dialog>
+  <dialog id="history-dialog" class="modal history-modal"><div class="modal-heading"><div><div class="eyebrow">EVERY SMALL STEP COUNTS</div><h2>你的练习记录</h2></div><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div id="history-content"></div><p class="quiet history-note">记录保存在当前浏览器。清除浏览器数据会一并删除，请及时导出。</p></dialog>
+  <dialog id="help-dialog" class="modal small-modal"><div class="modal-heading"><h2>开始你的第一句听写</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><ol class="help-steps"><li><strong>导入录音与英文原文</strong><p>上传录音后填写开始和结束秒数，可先试听所选范围。再导入 TXT、PDF、图片或字幕，校对原文后点击“开始逐句切分”。</p></li><li><strong>选择速度，反复听一句</strong><p>0.5–1.5 倍速，每档 0.1；可选只播放 1 遍，或循环 2–5 遍。默认播完后停下，留时间听写。</p></li><li><strong>写下内容，再核对</strong><p>原文默认隐藏。点击“显示原文”或“核对原文”，完成后进入下一句。</p></li></ol><div class="help-note">分段优先选择 8–15 秒内的停顿及说话人变化；末段可较短，没有可靠切点时保留较长语音。原文仅作辅助匹配，存疑时请试听核对。可在播放器右侧微调切点。PDF、图片识别及声音分析组件首次使用需联网加载。</div><button class="button primary full" data-close>开始练习</button></dialog>
+  <dialog id="source-proof-dialog" class="modal proof-modal"><div class="modal-heading"><h2>原始材料与核验记录</h2><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div id="source-proof-content"></div></dialog>
+  <div id="toast" role="status" class="toast hidden"></div>
+  <script src="app.js" type="module"></script>
+</body></html>
